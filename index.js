@@ -1,8 +1,10 @@
-const { response } = require('express');
 const express = require('express');
 const app = express();
+const cors = require('cors');
 // json parser transforms JSON data of request into JavaScript object and then attaches it to body property of req object
 app.use(express.json());
+// allow react app running on localhost3000 to fetch data from express server running on localhost3001
+app.use(cors());
 
 let notes = [
   {
@@ -26,6 +28,7 @@ let notes = [
 ];
 
 const generateId = () => {
+  // array is spreaded so that it can be used with Math.max since it doesn't work with arrays
   const maxId = notes.length > 0 ? Math.max(...notes.map(note => note.id)) : 0;
   return maxId + 1;
 };
@@ -53,16 +56,16 @@ app.post('/api/notes', (req, res) => {
   const body = req.body;
 
   if (!body.content) {
-    return response.status(400).json({
+    return res.status(400).json({
       error: 'content missing',
     });
   }
 
   const note = {
-    content: body.content,
-    important: body.important || false,
-    date: new Date(),
     id: generateId(),
+    content: body.content,
+    date: new Date(),
+    important: body.important || false,
   };
 
   notes = notes.concat(note);
